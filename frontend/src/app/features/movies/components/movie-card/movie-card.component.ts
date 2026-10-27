@@ -1,18 +1,16 @@
-import { Component, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Component, OnChanges, OnInit, SimpleChanges, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Movie } from '../../models/movie.model';
 
 @Component({
   selector: 'app-movie-card',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterLink],
   templateUrl: './movie-card.component.html',
-  styleUrls: ['./movie-card.component.css']
+  styleUrl: './movie-card.component.css'
 })
-export class MovieCardComponent {
-  @Input() movie!: Movie;
-  @Output() movieSelected = new EventEmitter<Movie>();
+export class MovieCardComponent implements OnChanges, OnInit {
+  readonly movie = input.required<Movie>();
+  readonly movieSelected = output<Movie>();
 
   ngOnChanges(changes: SimpleChanges): void {
     console.log('MovieCardComponent - ngOnChanges ejecutado');
@@ -33,10 +31,10 @@ export class MovieCardComponent {
   }
 
   ngOnInit(): void {
-    console.log('MovieCardComponent - ngOnInit ejecutado: movie is', this.movie.title);
+    console.log('MovieCardComponent - ngOnInit ejecutado: movie is', this.movie().title);
   }
 
   onMovieClick(): void {
-    this.movieSelected.emit(this.movie);
+    this.movieSelected.emit(this.movie());
   }
 }

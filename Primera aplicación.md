@@ -41,6 +41,8 @@ Parámetros:
     
     ![image.png](Primera%20aplicaci%C3%B3n%201f155f234e0b814186f6c5c03d9bafbf/image%201.png)
     
+1. Desde v20 también pregunta qué herramientas de IA configurar con las buenas prácticas de Angular. Para el curso podemos elegir `None`.
+    
 
 1. Ejecutamos la aplicación:
     

@@ -18,6 +18,13 @@
 <aside>
 💡
 
+Desde Angular v20, `ng new` y `ng g c` generan los archivos sin el sufijo `.component` (por ejemplo `app.ts`, `app.html`, `app.css` y la clase `App`). En el proyecto de ejemplo mantenemos el sufijo `.component` gracias a la configuración `schematics` de `angular.json`. Las dos convenciones funcionan igual.
+
+</aside>
+
+<aside>
+💡
+
 Los archivos `*.spec.ts`* tienen propósitos de testing. Se escapa del curso.
 
 </aside>

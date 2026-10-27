@@ -16,6 +16,6 @@ ng g c <<nombreComponente>>
 <aside>
 💡
 
-Si quiero evitar el archivo *.spec.ts:* `ng g c <<nombreComponente>> —skip-tests=true`
+Si quiero evitar el archivo *.spec.ts:* `ng g c <<nombreComponente>> --skip-tests`
 
 </aside>

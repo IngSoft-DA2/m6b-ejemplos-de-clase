@@ -12,13 +12,14 @@
 
 ```tsx
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-my-standalone',
-  standalone: true, // ACÁ PUEDO INDICAR EL ENFOQUE (en parte)
-  imports: [CommonModule],
-  template: `<h1>Standalone Component!</h1>`,
+  // Desde v19 todo componente es standalone por defecto.
+  // Para declararlo dentro de un NgModule hay que indicar `standalone: false`.
+  imports: [RouterLink], // Las dependencias se importan directamente en el componente
+  template: `<h1>Standalone Component!</h1> <a routerLink="/">Inicio</a>`,
 })
 export class MyStandaloneComponent {}
 ```
@@ -30,7 +31,7 @@ export class MyStandaloneComponent {}
 ```tsx
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MyComponent } from './my.component';
+import { MyComponent } from './my.component'; // declarado con `standalone: false`
 
 @NgModule({
   declarations: [MyComponent], // Acá hago la referencia a mi componente

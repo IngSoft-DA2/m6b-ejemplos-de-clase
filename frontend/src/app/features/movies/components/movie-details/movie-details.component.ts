@@ -1,51 +1,52 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router'; // Para acceder a los parámetros de ruta y routerLink
-import { switchMap } from 'rxjs/operators';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router'; // Para acceder a los parámetros de ruta y routerLink
+import { EMPTY, switchMap } from 'rxjs';
 import { Movie } from '../../models/movie.model';
 import { MovieService } from '../../services/movie.service';
 
 @Component({
   selector: 'app-movie-details',
-  imports: [CommonModule, RouterModule],
+  imports: [RouterLink],
   templateUrl: './movie-details.component.html',
-  styleUrls: ['./movie-details.component.css']
+  styleUrl: './movie-details.component.css'
 })
 export class MovieDetailsComponent implements OnInit {
-  movie: Movie | undefined;
-  isLoading: boolean = true;
-  error: string | null = null;
+  private readonly route = inject(ActivatedRoute); // Para obtener parámetros de la URL
+  private readonly movieService = inject(MovieService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(
-    private route: ActivatedRoute, // Para obtener parámetros de la URL
-    private movieService: MovieService
-  ) { }
+  protected readonly movie = signal<Movie | undefined>(undefined);
+  protected readonly isLoading = signal(true);
+  protected readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
     this.route.paramMap.pipe(
       switchMap(params => {
         const movieId = Number(params.get('id'));
-        if (isNaN(movieId) || movieId === 0) {
-          this.error = 'ID de película inválido.';
-          this.isLoading = false;
-          return []; // Retorna un Observable vacío para no continuar
+        if (!Number.isInteger(movieId) || movieId <= 0) {
+          this.error.set('ID de película inválido.');
+          this.isLoading.set(false);
+          return EMPTY; // Observable vacío para no continuar
         }
-        this.isLoading = true;
-        this.error = null;
+        this.isLoading.set(true);
+        this.error.set(null);
         return this.movieService.getMovieById(movieId);
-      })
+      }),
+      // paramMap no se completa solo: cortamos la suscripción cuando se destruye el componente
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (data) => {
-        this.movie = data;
-        this.isLoading = false;
+        this.movie.set(data);
+        this.isLoading.set(false);
         if (!data) {
-          this.error = 'Película no encontrada.';
+          this.error.set('Película no encontrada.');
         }
       },
       error: (err) => {
         console.error('Error fetching movie details:', err);
-        this.error = 'No se pudieron cargar los detalles de la película. Inténtelo de nuevo más tarde.';
-        this.isLoading = false;
+        this.error.set('No se pudieron cargar los detalles de la película. Inténtelo de nuevo más tarde.');
+        this.isLoading.set(false);
       }
     });
   }

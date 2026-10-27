@@ -1,25 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-
 export class LoginComponent {
-  username: string = '';
-  password: string = '';
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
-  constructor(private authService: AuthService, private router: Router) {}
+  protected readonly username = signal('');
+  protected readonly password = signal('');
 
-  onSubmit() {
-    if (this.authService.login(this.username, this.password)) {
-      this.router.navigate(['//actors']);
+  protected onSubmit(): void {
+    if (this.authService.login(this.username(), this.password())) {
+      this.router.navigate(['/actors']);
     }
   }
 }

@@ -10,6 +10,6 @@ export const routes: Routes = [
   { path: 'movies', component: MovieListComponent },
   { path: 'movies/:id', component: MovieDetailsComponent },
   { path: 'actors', component: ActorListComponent, canActivate: [authGuard] },
-  { path: "login", component: LoginComponent },
+  { path: 'login', component: LoginComponent },
   { path: '**', redirectTo: '/movies' }
 ];

@@ -27,7 +27,7 @@ src/
 │   │   ├── main-layout/
 │   │   └── auth-layout/
 │   │
-│   ├── app.component.ts
+│   ├── app.component.ts   (app.ts en proyectos creados con v20+)
 │   ├── app.routes.ts
 │   └── app.config.ts
 │

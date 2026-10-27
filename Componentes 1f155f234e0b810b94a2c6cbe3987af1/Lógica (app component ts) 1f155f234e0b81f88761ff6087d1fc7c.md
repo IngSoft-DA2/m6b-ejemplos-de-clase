@@ -9,7 +9,6 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-ejemplo',
-  standalone: true,
   imports: [],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -18,6 +17,13 @@ export class AppComponent {
   // AQUÍ LÓGICA...
 }
 ```
+
+<aside>
+💡
+
+Desde v19 los componentes son *standalone* por defecto, así que ya no hace falta escribir `standalone: true`.
+
+</aside>
 
 ### Ahora… ¿qué es cada cosa?
 
@@ -33,13 +39,11 @@ export class AppComponent {
     
     ```tsx
     @Component({
-      standalone: true,
       selector: 'profile-photo',
     })
     export class ProfilePhoto { }
     
     @Component({
-      standalone: true,
       imports: [ProfilePhoto],
       template: `<profile-photo />`
     })

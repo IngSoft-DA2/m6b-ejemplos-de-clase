@@ -75,7 +75,7 @@ Aunque Angular es un framework para construir aplicaciones web del lado del clie
 3. **Servidor de desarrollo:**
     Durante el desarrollo, `ng serve` levanta un servidor local basado en Node.js.
 4. **Build y herramientas:**
-    Herramientas como Webpack, TypeScript, Prettier o ESLint (usadas en proyectos Angular) se ejecutan gracias a Node.js.
+    Herramientas como esbuild y Vite (que usa el Angular CLI para compilar y servir), TypeScript, Prettier o ESLint se ejecutan gracias a Node.js.
 
 Node.js ejecuta JavaScript en el back-end y proporciona el entorno de desarrollo para Angular. Angular depende de Node.js en desarrollo, pero el resultado final de una app Angular es puro JavaScript que puede correr sin Node.
 
@@ -91,7 +91,8 @@ Node.js ejecuta JavaScript en el back-end y proporciona el entorno de desarrollo
 
 - Es un Framework para el desarrollo web: Angular es un framework de desarrollo de aplicaciones web mantenido por Google, diseñado para crear aplicaciones de una sola página (SPA) con una experiencia de usuario fluida y dinámica.
 - Uso de TypeScript: Angular se basa en TypeScript, un superconjunto de JavaScript que proporciona tipado estático.
-- En Angular moderno, el enfoque con componentes standalone es la opción preferida para nuevas aplicaciones, aunque NgModules siguen existiendo en muchos proyectos.
+- En Angular moderno, el enfoque con componentes standalone es la opción preferida para nuevas aplicaciones (desde v19 es el valor por defecto), aunque NgModules siguen existiendo en muchos proyectos.
+- Reactividad con signals: desde v21 las aplicaciones nuevas son *zoneless* (no usan `zone.js`) y desde v22 los componentes usan `OnPush` por defecto. Angular actualiza la vista cuando cambia un `signal` que lee el template.
 
 ![angular](image-2.png)
 
@@ -155,7 +156,7 @@ El resultado de la transpilación son archivos `.js` que pueden ser ejecutados e
 
 - Angular tiene un inyector de dependencias propio que gestiona automáticamente las instancias de servicios.
 - Permite desacoplar componentes de las implementaciones concretas.
-- Ejemplo: `constructor(private userService: UserService) {}`
+- Ejemplo: `private readonly userService = inject(UserService);` (también se puede inyectar por constructor: `constructor(private userService: UserService) {}`)
 
 ## 2. Observador (Observer)
 
@@ -176,7 +177,7 @@ El resultado de la transpilación son archivos `.js` que pueden ser ejecutados e
 
 ## 6. Mediador (Mediator)
 
-- Angular usa `@Input()` y `@Output()` para la comunicación entre componentes.
+- Angular usa `input()` y `output()` (antes los decoradores `@Input()` y `@Output()`) para la comunicación entre componentes.
 
 ## Angular y los Principios SOLID
 
@@ -226,7 +227,7 @@ flowchart TD
 - El template captura eventos del usuario.
 - El componente coordina la interacción y mantiene estado de presentación.
 - Los servicios encapsulan lógica de negocio o acceso a datos.
-- Angular actualiza la vista cuando cambia el estado del componente.
+- Angular actualiza la vista cuando cambia el estado del componente (expresado con signals).
 
 Plugins recomendados:
 
@@ -254,7 +255,7 @@ Los principales hooks, en orden de ejecución, son:
 
 ## 1. `ngOnChanges()`
 
-- Se ejecuta antes de `ngOnInit` y cada vez que uno o más de los atributos de entrada (`@Input()`) cambian.
+- Se ejecuta antes de `ngOnInit` y cada vez que uno o más de los atributos de entrada (`input()` o `@Input()`) cambian.
 - Propósito: Detectar y reaccionar a cambios en las propiedades de entrada de un componente.
 
 ## 2. `ngOnInit()`
@@ -284,9 +285,17 @@ Los principales hooks, en orden de ejecución, son:
 
 ## Comunicación entre Componentes
 
-## @Input() y @Output()
+## input() y output()
 
 - Permiten enviar datos de un componente padre a un componente hijo y viceversa.
+
+```typescript
+export class MovieCardComponent {
+  readonly movie = input.required<Movie>();   // el padre envía: <app-movie-card [movie]="m" />
+  readonly movieSelected = output<Movie>();   // el padre escucha: (movieSelected)="onSelect($event)"
+}
+```
+
 - Servicios: Se usan para compartir información y lógica entre componentes.
 
 ### Flujo Típico de una Interacción en Angular
@@ -316,54 +325,54 @@ sequenceDiagram
 
 ```typescript
 export class MiComponente {
-  mensaje: string = 'Hola desde Angular';
+  mensaje = signal('Hola desde Angular');
 }
 ```
 
 ```html
-<p>{{ mensaje }}</p>
+<p>{{ mensaje() }}</p>
 ```
 
 ## 2. Property Binding ([ ])
 
 ```typescript
 export class MiComponente {
-  imagenUrl: string = 'https://ejemplo.com/imagen.jpg';
+  imagenUrl = signal('https://ejemplo.com/imagen.jpg');
 }
 ```
 
 ```html
-<img [src]="imagenUrl" />
+<img [src]="imagenUrl()" />
 ```
 
 ## 3. Event Binding (( ))
 
 ```typescript
 export class MiComponente {
-  mensaje: string = '';
+  mensaje = signal('');
 
   mostrarMensaje() {
-    this.mensaje = '¡Botón presionado!';
+    this.mensaje.set('¡Botón presionado!');
   }
 }
 ```
 
 ```html
 <button (click)="mostrarMensaje()">Haz clic aquí</button>
-<p>{{ mensaje }}</p>
+<p>{{ mensaje() }}</p>
 ```
 
 ## 4. Two-Way Data Binding ([( )])
 
 ```typescript
 export class MiComponente {
-  nombre: string = '';
+  nombre = signal('');
 }
 ```
 
 ```html
 <input [(ngModel)]="nombre" placeholder="Escribe tu nombre" />
-<p>Hola, {{ nombre }}!</p>
+<p>Hola, {{ nombre() }}!</p>
 ```
 
 Nota: para usar `[(ngModel)]`, normalmente debes importar `FormsModule` en el componente o módulo correspondiente.
@@ -385,27 +394,29 @@ Una directiva es una clase de TypeScript que modifica el comportamiento o la est
 - Directivas de atributos: Modifican la apariencia o comportamiento de un elemento existente.
   - `[ngClass]`, `[ngStyle]`, `ngModel`
 - Directivas estructurales: Alteran la estructura del DOM.
-  - `ngIf`, `ngFor`, `ngSwitch`
+  - `*ngIf`, `*ngFor`, `*ngSwitch` (deprecadas desde v20: en su lugar se usan los bloques `@if`, `@for` y `@switch` del template)
 
 ## Ejemplo de Directiva Propia
 
 ```typescript
-import { Directive, Input, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Directive, TemplateRef, ViewContainerRef, effect, inject, input } from '@angular/core';
 
 @Directive({
   selector: '[appSi]'
 })
 export class AppSiDirective {
-  constructor(
-    private templateRef: TemplateRef<any>,
-    private viewContainer: ViewContainerRef
-  ) {}
+  private readonly templateRef = inject<TemplateRef<unknown>>(TemplateRef);
+  private readonly viewContainer = inject(ViewContainerRef);
 
-  @Input() set appSi(condicion: boolean) {
-    this.viewContainer.clear();
-    if (condicion) {
-      this.viewContainer.createEmbeddedView(this.templateRef);
-    }
+  readonly appSi = input.required<boolean>();
+
+  constructor() {
+    effect(() => {
+      this.viewContainer.clear();
+      if (this.appSi()) {
+        this.viewContainer.createEmbeddedView(this.templateRef);
+      }
+    });
   }
 }
 ```
@@ -430,7 +441,7 @@ Indica que la clase es un servicio o provider inyectable.
 
 ## 5. @NgModule
 
-Usado para agrupar componentes, directivas, pipes, servicios, etc., en un módulo lógico.
+Usado para agrupar componentes, directivas, pipes, servicios, etc., en un módulo lógico. Es el enfoque anterior a standalone; se sigue encontrando en proyectos existentes.
 
 ## Servicios en Angular: Lógica de Negocio y Reutilización
 
@@ -450,7 +461,7 @@ Angular utiliza un patrón de Inyección de Dependencias (DI) para proporcionar 
 
 - `@Injectable()`: Marca la clase como un proveedor de inyección de dependencias.
 - `providedIn: 'root'`: Hace que Angular cree una única instancia global del servicio.
-- `'any'`: El servicio se proporciona en el primer módulo o contexto que lo inyecte.
+- `'any'` (deprecado): El servicio se proporciona en el primer módulo o contexto que lo inyecte.
 - `@NgModule({ providers: [MovieService] })`: Proporciona el servicio solo a un NgModule específico.
 - `@Component({ providers: [MovieService] })`: Proporciona el servicio a nivel de componente.
 
@@ -462,5 +473,5 @@ Angular utiliza un patrón de Inyección de Dependencias (DI) para proporcionar 
 
 ## Inyección de Dependencias (DI) en Detalle
 
-1. El Sistema de Inyección: Cuando una clase declara una dependencia en su constructor, Angular busca en el inyector.
+1. El Sistema de Inyección: Cuando una clase pide una dependencia con `inject()` (o en su constructor), Angular la busca en el inyector.
 2. Ámbito de los Inyectores: Angular tiene una jerarquía de inyectores. Cada componente y cada módulo tiene su propio inyector. Si un servicio se proporciona en múltiples niveles, el componente obtendrá la instancia más cercana en la jerarquía.

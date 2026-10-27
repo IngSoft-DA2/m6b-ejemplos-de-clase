@@ -49,6 +49,13 @@ Cuidado… esto es a partir de v17+. En versiones anteriores se trabaja con *dir
 
 ### Sino… con *directives*…
 
+<aside>
+⚠️
+
+`*ngIf`, `*ngFor` y `*ngSwitch` están deprecadas desde v20. Las mostramos porque aparecen en proyectos existentes; en código nuevo usen `@if`, `@for` y `@switch`. Para convertir un proyecto: `ng update @angular/core --name control-flow-migration`.
+
+</aside>
+
 ```html
 <!-- app.component.html -->
 

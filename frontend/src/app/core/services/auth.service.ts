@@ -1,16 +1,16 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
-
 export class AuthService {
-  private isLogged = false;
+  private readonly TOKEN_KEY = 'token';
+  private readonly isLogged = signal(false);
 
   public login(email: string, password: string): boolean {
     if (email === 'user' && password === '1234') {
-      this.isLogged = true;
-      localStorage.setItem('token', 'token-back');
+      this.isLogged.set(true);
+      localStorage.setItem(this.TOKEN_KEY, 'token-back');
       return true;
     }
 
@@ -19,11 +19,11 @@ export class AuthService {
   }
 
   public logout(): void {
-    this.isLogged = false;
-    localStorage.removeItem('token');
+    this.isLogged.set(false);
+    localStorage.removeItem(this.TOKEN_KEY);
   }
 
   public isUserLogged(): boolean {
-    return this.isLogged;
+    return this.isLogged();
   }
 }
