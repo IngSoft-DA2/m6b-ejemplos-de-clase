@@ -1,0 +1,25 @@
+<div class="movie-details-container">
+  <a class="back-button" routerLink="/movies">← Volver a la Lista</a>
+
+  @if (isLoading()) {
+    <div class="loading-message">Cargando detalles de la película...</div>
+  } @else if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  } @else if (movie(); as movie) {
+    <div class="movie-details-card">
+      <div class="movie-poster-wrapper">
+        @if (movie.poster_path; as poster) {
+          <img [src]="poster" [alt]="movie.title + ' poster'" class="movie-detail-poster" />
+        }
+      </div>
+      <div class="movie-info-details">
+        <h2>{{ movie.title }}</h2>
+        <p><strong>Año de Estreno:</strong> {{ movie.release_date.slice(0, 4) }}</p>
+        <p><strong>Género:</strong> @for (g of movie.genres; track g.id; let last = $last) {{{ g.name }}{{ last ? '' : ', ' }}}</p>
+        <hr />
+        <h3>Sinopsis:</h3>
+        <p>{{ movie.overview }}</p>
+      </div>
+    </div>
+  }
+</div>

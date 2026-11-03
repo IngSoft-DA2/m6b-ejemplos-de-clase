@@ -1,15 +1,28 @@
 import { Routes } from '@angular/router';
-import { MovieListComponent } from './features/movies/components/movie-list/movie-list.component';
-import { MovieDetailsComponent } from './features/movies/components/movie-details/movie-details.component';
-import { ActorListComponent } from './features/actors/components/actor-list/actor-list.component';
-import { LoginComponent } from './shared/components/login/login.component';
-import { authGuard } from './core/guards/auth.guard';
+import { NotFound } from './shared/not-found/not-found';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/movies', pathMatch: 'full' },
-  { path: 'movies', component: MovieListComponent },
-  { path: 'movies/:id', component: MovieDetailsComponent },
-  { path: 'actors', component: ActorListComponent, canActivate: [authGuard] },
-  { path: 'login', component: LoginComponent },
-  { path: '**', redirectTo: '/movies' }
+  {
+    path: '',
+    redirectTo: 'movies',
+    pathMatch: 'full',
+  },
+  {
+    path: 'movies',
+    loadChildren: () => import('./features/movies/movies.routes').then((m) => m.MOVIES_ROUTES),
+  },
+  {
+    path: 'actors',
+    loadChildren: () => import('./features/actors/actors.routes').then((m) => m.ACTORS_ROUTES),
+  },
+  {
+    path: 'login',
+    title: 'Login | Movie Manager',
+    loadComponent: () => import('./features/auth/login-page/login-page').then((m) => m.LoginPage),
+  },
+  {
+    path: '**',
+    title: 'Not found | Movie Manager',
+    component: NotFound,
+  },
 ];

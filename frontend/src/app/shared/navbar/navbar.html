@@ -1,0 +1,14 @@
+<nav class="navbar">
+  <a class="navbar-brand" routerLink="/">Movie Manager</a>
+  <ul class="navbar-links">
+    <li><a routerLink="/movies" routerLinkActive="active">Movies</a></li>
+    <li><a routerLink="/actors" routerLinkActive="active">Actors</a></li>
+    <li>
+      @if (isLogged()) {
+        <a href="#" (click)="logout(); $event.preventDefault()">Logout</a>
+      } @else {
+        <a routerLink="/login" routerLinkActive="active">Login</a>
+      }
+    </li>
+  </ul>
+</nav>
