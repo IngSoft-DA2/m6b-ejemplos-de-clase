@@ -1,0 +1,22 @@
+<section class="movie-list-container">
+  <h1>Películas Destacadas</h1>
+  <p class="favorites-count">Favoritas: {{ favoriteIds().size }}</p>
+
+  @if (isLoading()) {
+    <div class="loading-message">Cargando películas...</div>
+  } @else if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  } @else if (movies().length === 0) {
+    <div class="no-movies-message">No se encontraron películas.</div>
+  } @else {
+    <div class="movie-grid">
+      @for (movie of movies(); track movie.id) {
+        <app-movie-card
+          [movie]="movie"
+          [isFavorite]="favoriteIds().has(movie.id)"
+          (favoriteToggled)="onFavoriteToggled($event)"
+        />
+      }
+    </div>
+  }
+</section>

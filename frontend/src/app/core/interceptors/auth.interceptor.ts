@@ -1,45 +1,21 @@
+import { inject } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
+import { AuthService } from '../../features/auth/services/auth.service';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// HTTP INTERCEPTOR — AUTH
-//
-// Un interceptor es un "middleware" para requests HTTP.
-// Intercepta TODOS los requests que salen de la app antes de que lleguen
-// al servidor, y puede modificarlos (por ejemplo, agregar headers).
-//
-// ¿Por qué usamos esto?
-//   Sin interceptor, tendríamos que agregar el header Authorization
-//   manualmente en cada llamada HTTP de cada service. El interceptor
-//   lo hace automáticamente una sola vez.
-//
-// En Angular 14+ podemos definir interceptores como funciones puras
-// (HttpInterceptorFn) en lugar de clases. Es más simple y tree-shakeable.
-// ─────────────────────────────────────────────────────────────────────────────
+// Interceptor funcional (HttpInterceptorFn): se ejecuta en cada request HTTP saliente,
+// así los services no tienen que agregar el header Authorization a mano.
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = inject(AuthService).getToken();
 
-  // ── Paso 1: Leer el token del localStorage ─────────────────────────────────
-  // Leemos directamente del localStorage. Si no hay sesión activa,
-  // getItem devuelve null y dejamos pasar el request sin modificar.
-  const token = localStorage.getItem('auth_token');
-
-  // ── Paso 2: Si no hay token, dejamos pasar el request tal como está ─────────
+  // Sin sesión activa el request sale tal cual
   if (!token) {
-    // `next(req)` envía el request original al servidor sin cambios.
     return next(req);
   }
 
-  // ── Paso 3: Clonar el request y agregar el header Authorization ─────────────
-  // Los objetos HttpRequest son inmutables — no podemos modificarlos directamente.
-  // Debemos usar .clone() para crear una copia con las modificaciones que queremos.
-  const authenticatedRequest = req.clone({
-    setHeaders: {
-      // El formato estándar es "Bearer <token>".
-      // El backend valida este header para autorizar la operación.
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  // ── Paso 4: Enviar el request modificado ───────────────────────────────────
-  // Pasamos el request clonado (con el header) en lugar del original.
-  return next(authenticatedRequest);
+  // Los HttpRequest son inmutables: se clona con el header agregado
+  return next(
+    req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` },
+    }),
+  );
 };

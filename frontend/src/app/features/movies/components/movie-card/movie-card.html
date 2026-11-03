@@ -1,0 +1,21 @@
+<a class="movie-card" [routerLink]="['/movies', movie().id]">
+  @if (movie().poster_path; as poster) {
+    <img [src]="poster" [alt]="movie().title + ' poster'" class="movie-poster" />
+  } @else {
+    <div class="no-poster">Sin poster</div>
+  }
+  <div class="movie-info">
+    <h3>{{ movie().title }}</h3>
+    <p>{{ movie().release_date.slice(0, 4) }} · {{ movie().original_language.toUpperCase() }}</p>
+  </div>
+</a>
+
+<button
+  type="button"
+  class="favorite-button"
+  [class.active]="isFavorite()"
+  [attr.aria-label]="isFavorite() ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+  (click)="toggleFavorite()"
+>
+  {{ isFavorite() ? '♥' : '♡' }}
+</button>
